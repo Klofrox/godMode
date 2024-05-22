@@ -4,7 +4,7 @@
 
 
 
-### God Mode is a plugin that allows users to visually manipulate their role and authority on Discord servers. This is specifically designed for testing and demonstration use.
+### God Mode is a Vencord plugin that allows users to visually manipulate their role and authority on Discord servers. This is specifically designed for testing and demonstration use.
 
 ----
 
@@ -42,6 +42,7 @@
 
 ### How to Install
 Watch this: https://youtu.be/8wexjSo8fNw
+https://github.com/Vendicated/Vencord
 
 ----
 
