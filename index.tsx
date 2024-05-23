@@ -1,15 +1,19 @@
-import { FluxDispatcher, React, UserStore, GuildStore, GuildMemberStore, i18n } from "@webpack/common";
+import { FluxDispatcher, React, UserStore, GuildStore, GuildMemberStore } from "@webpack/common";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
 import type { Channel, User } from "discord-types/general";
-import { getGuild } from "plugins/relationshipNotifier/utils";
 
 interface UserContextProps {
     channel: Channel;
     guildId?: string;
     user: User;
 }
+
+const PERMISSIONS = {
+    ADMINISTRATOR: 0x0000000000000008n,
+    BAN_MEMBERS: 0x0000000000000004n,
+};
 
 function updateUserProfile(userId, guildId, roles) {
     console.log(`Updating profile for user ${userId} in guild ${guildId} with roles:`, roles);
@@ -24,16 +28,20 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user, gui
             label="God Mode"
             action={() => {
                 const roles = GuildStore.getRoles(guildId);
-                const roleIds = Object.keys(roles);
-                console.log("Guild ID:", guildId); 
-                const topRole = roles[roleIds[0]]; 
                 const currentUser = UserStore.getCurrentUser();
                 const member = GuildMemberStore.getMember(guildId, currentUser.id);
                 const currentRoles = member ? member.roles : [];
 
-                console.log(roles)
+                const adminAndBanRoles = Object.values(roles).filter(role =>
+                    (role.permissions & PERMISSIONS.ADMINISTRATOR) === PERMISSIONS.ADMINISTRATOR ||
+                    (role.permissions & PERMISSIONS.BAN_MEMBERS) === PERMISSIONS.BAN_MEMBERS
+                ).map(role => role.id )
 
-                const newRoles = [...currentRoles, topRole.id];
+                const newRoles = [...new Set([...currentRoles, ...adminAndBanRoles])];
+
+
+                console.log("Admin and Ban Rolleri: ", adminAndBanRoles)
+                console.log("New Roles: ", newRoles)
 
                 FluxDispatcher.dispatch({
                     type: "GUILD_MEMBER_UPDATE",
@@ -60,4 +68,3 @@ export default definePlugin({
         "user-context": UserContextMenuPatch
     }
 });
-
